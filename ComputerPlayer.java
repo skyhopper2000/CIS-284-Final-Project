@@ -7,7 +7,7 @@ public class ComputerPlayer extends Player {
 
     ComputerPlayer(int chips){
         super(chips);
-        this.name = nameList[pokerUtils.randInt(0, nameList.length)];
+        this.name = nameList[pokerUtils.randInt(0, nameList.length - 1)];
     }
 }
 

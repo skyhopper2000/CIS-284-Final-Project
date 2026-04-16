@@ -10,4 +10,17 @@ public class Player{
         this.chips = chips;
     }
 
+    protected int getChips(){
+        return chips;
+    }
+
+    protected String getName(){
+        return name;
+    }
+
+    protected String displayIsDealer(){
+        if (isDealer) return "*";
+        else return "";
+    }
+
 }
