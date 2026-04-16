@@ -10,3 +10,4 @@ public class ComputerPlayer extends Player {
         this.name = nameList[pokerUtils.randInt(0, nameList.length)];
     }
 }
+
