@@ -1,10 +1,12 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class mainApp {
 
   static ArrayList<Player> computerPlayers = new ArrayList<>();
   static UserPlayer userPlayer;
+  static ArrayList<Player> table = new ArrayList<>();
 
   protected static void drawBoardStatus(){
     try{
@@ -25,6 +27,35 @@ public class mainApp {
     }
   }
 
+  protected static ArrayList<Player> orderTable(ArrayList<Player> table){
+
+    int index = -1;
+
+    // Step 1: find first matching index
+    for (int i = 0; i < table.size(); i++) {
+        if (table.get(i).isDealer) {
+            index = i;
+            break;
+        }
+    }
+
+    // Step 2: if no match or already first, return copy
+    if (index <= 0) {
+        return new ArrayList<>(table);
+    }
+
+    // Step 3: build new rotated list
+    ArrayList<Player> result = new ArrayList<>(table.size());
+
+    // add from match → end
+    result.addAll(table.subList(index, table.size()));
+
+    // add from start → match
+    result.addAll(table.subList(0, index));
+
+    return result;
+  }
+
   public static void main(String[] args){
     int numNPCs = 0;
     
@@ -41,17 +72,33 @@ public class mainApp {
       System.out.println("What is your name?");
       String playerName = mainReader.readLine();
       userPlayer = new UserPlayer(150, playerName);
+      table.add(userPlayer);
+      table.addAll(computerPlayers);
+      table.get(pokerUtils.randInt(0, table.size() - 1)).assignDealer();
+      table = orderTable(table);
 
       // Game Loop
+
+      int turn = 0;
       do {
+        turn++;
         // display board status
         drawBoardStatus();
         // pay ante
+        for (int i = 1; i < table.size(); i++){
+          Player player = table.get(i);
+          player.placeBet(1);
+          System.out.print("Paid ante");
+        }
+        Player dealer = table.get(0);
+        dealer.placeBet(1);
+        System.out.println("Dealer Paid ante");
+        drawBoardStatus();
         // first betting
         // draw
         // second betting
         // showdown
-      } while (userPlayer.getChips() > 0);
+      } while (turns < 5);
     // Exception handling, prevents exiting application prematurely on an error
     } catch (IOException e){
         System.out.println("IO Error: " + e);
