@@ -14,6 +14,14 @@ public class Player{
         return chips;
     }
 
+    protected void placeBet(int amount){
+        if (amount < chips - currentBet){
+            currentBet = currentBet + amount;
+        }else{
+            System.out.println("Invalid bet");
+        }
+    }
+
     protected String getName(){
         return name;
     }
@@ -21,6 +29,10 @@ public class Player{
     protected String displayIsDealer(){
         if (isDealer) return "*";
         else return "";
+    }
+
+    protected void assignDealer(){
+        isDealer = true;
     }
 
 }
