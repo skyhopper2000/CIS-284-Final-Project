@@ -7,8 +7,9 @@ public class mainApp {
   static ArrayList<Player> computerPlayers = new ArrayList<>();
   static UserPlayer userPlayer;
   static ArrayList<Player> table = new ArrayList<>();
+  static public highestBet = 0;
 
-  protected static void drawBoardStatus(){
+  private static void drawBoardStatus(){
     try{
     for(int i = 0; i < computerPlayers.size(); i++){
       Player currentPlayer = computerPlayers.get(i);
@@ -27,7 +28,7 @@ public class mainApp {
     }
   }
 
-  protected static ArrayList<Player> orderTable(ArrayList<Player> table){
+  private static ArrayList<Player> orderTable(ArrayList<Player> table){
 
     int index = -1;
 
@@ -56,6 +57,16 @@ public class mainApp {
     return result;
   }
 
+  private static Boolean inPlay(ArrayList<Player> table){
+    for(int i = 0; i < table.size(); i++){
+      Player player = table.get(i);
+      if ((player.getDecision() == "RAISE") || (player.getDecision() == "UNDECIDED")){
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static void main(String[] args){
     int numNPCs = 0;
     
@@ -81,23 +92,63 @@ public class mainApp {
 
       int turn = 0;
       do {
+
         turn++;
+
         // display board status
         drawBoardStatus();
+
         // pay ante
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
           player.placeBet(1);
-          System.out.print("Paid ante");
+          System.out.print(player.getName() + " paid ante");
         }
         Player dealer = table.get(0);
         dealer.placeBet(1);
-        System.out.println("Dealer Paid ante");
+        System.out.println("Dealer paid ante");
         drawBoardStatus();
+
         // first betting
+        int playerIndex = 0;
+        while(inPlay(table)){
+          playerIndex++;
+          Player player = table.get(playerIndex);
+          if (player.getDecision() == "FOLD"){
+            System.out.println(player.getName() + " has already folded.");
+            continue;
+          }
+          String newDecision = player.makeDecision();
+          player.setDecision(newDecision);
+          System.out.println(player.getName() + " has decided to " + newDecision);
+          Thread.sleep(1000);
+        }
+
         // draw
+        for (int i = 1; i < table.size(); i++){
+          Player player = table.get(i);
+          ArrayList<int> discards = player.chooseDiscards();
+          System.out.println(player.getName() + " discarded " + discards.size() + "cards.")
+          Thread.sleep(1000);
+        }
+
         // second betting
+        playerIndex = 0;
+        while(inPlay(table)){
+          playerIndex++;
+          Player player = table.get(playerIndex);
+          if (player.getDecision() == "FOLD"){
+            System.out.println(player.getName() + " has already folded.");
+            continue;
+          }
+          String newDecision = player.makeDecision();
+          player.setDecision(newDecision);
+          System.out.println(player.getName() + " has decided to " + newDecision);
+          Thread.sleep(1000);
+        }
+        
         // showdown
+
       } while (turns < 5);
     // Exception handling, prevents exiting application prematurely on an error
     } catch (IOException e){
