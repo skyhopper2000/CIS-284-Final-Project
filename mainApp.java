@@ -7,7 +7,7 @@ public class mainApp {
   static ArrayList<Player> computerPlayers = new ArrayList<>();
   static UserPlayer userPlayer;
   static ArrayList<Player> table = new ArrayList<>();
-  static public highestBet = 0;
+  static public int highestBet = 0;
 
   private static void drawBoardStatus(){
     try{
@@ -128,11 +128,17 @@ public class mainApp {
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
           ArrayList<int> discards = player.chooseDiscards();
-          System.out.println(player.getName() + " discarded " + discards.size() + "cards.")
+          System.out.println(player.getName() + " discarded " + discards.size() + "cards.");
           Thread.sleep(1000);
         }
 
         // second betting
+        for (int i = 0; i < table.size(); i++){
+          Player player = table.get(i);
+          if (player.getDecision() != "FOLD"){
+            player.setDecision("UNDECIDED", highestBet);
+          }
+        }
         playerIndex = 0;
         while(inPlay(table)){
           playerIndex++;
@@ -148,6 +154,13 @@ public class mainApp {
         }
         
         // showdown
+        ArrayList<Hand> showdownHands = new ArrayList<>();
+        for (int i = 0; i < table.size(); i++){
+          Player player = table.get(i);
+          if (player.getDecision() != "FOLD"){
+            showdownHands.add(player.getHand())
+          }
+        }
 
       } while (turns < 5);
     // Exception handling, prevents exiting application prematurely on an error

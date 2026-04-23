@@ -2,7 +2,7 @@ public class Player{
 
     protected int[] hand = {1, 2, 3, 4, 5};
     protected int chips;
-    public String decision = "UNDECIDED"
+    public String decision = "UNDECIDED";
     public int currentBet = 0;
     public Boolean isDealer = false;
     public String name;
@@ -23,7 +23,7 @@ public class Player{
         }
     }
 
-    protected void setDecision(String decision){
+    protected void setDecision(String decision, int highestBet){
         this.decision = decision;
         switch (decision){
             case "RAISE":
@@ -48,6 +48,10 @@ public class Player{
 
     protected String getName(){
         return name;
+    }
+
+    protected int[] getHand(){
+        return hand;
     }
 
     protected String displayIsDealer(){
