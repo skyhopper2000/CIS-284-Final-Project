@@ -127,9 +127,11 @@ public class mainApp {
         // draw
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
-          ArrayList<int> discards = player.chooseDiscards();
-          System.out.println(player.getName() + " discarded " + discards.size() + "cards.");
-          Thread.sleep(1000);
+          if (player.getDecision() != "FOLD"){
+            ArrayList<int> discards = player.chooseDiscards();
+            System.out.println(player.getName() + " discarded " + discards.size() + "cards.");
+            Thread.sleep(1000);
+          }
         }
 
         // second betting
@@ -154,15 +156,22 @@ public class mainApp {
         }
         
         // showdown
-        ArrayList<Hand> showdownHands = new ArrayList<>();
+        ArrayList<Player> showdownPlayers = new ArrayList<>();
         for (int i = 0; i < table.size(); i++){
           Player player = table.get(i);
           if (player.getDecision() != "FOLD"){
-            showdownHands.add(player.getHand())
+            showdownPlayers.add(player);
+            System.err.println(player.getName() + ": " + player.getHand().toString()); //future hand.display()
           }
         }
-
-      } while (turns < 5);
+        ArrayList<Player> winners = showdown(showdownPlayers);
+        System.out.println("Winner(s): ");
+        for(Player player in winners){
+          system.out.print(player.getName() + " ")
+        }
+        System.out.println("Would you like to play another round? (y/n)");
+        String playAnother = mainReader.readLine()
+      } while (playAnother == "y");
     // Exception handling, prevents exiting application prematurely on an error
     } catch (IOException e){
         System.out.println("IO Error: " + e);
