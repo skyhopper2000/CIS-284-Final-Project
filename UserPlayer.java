@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.util.ArrayList;
 
 public class UserPlayer extends Player{
     
@@ -7,7 +8,8 @@ public class UserPlayer extends Player{
         this.name = name;
     }
 
-    protected String makeDecision(int currentBet, BufferedReader mainReader){
+    protected String getDecision(int currentBet, BufferedReader mainReader){
+        System.out.println(hand.toString()); // Future: hand.display()
         System.out.println("What would you like to do, " + name + "?");
         System.out.println("1.) Call");
         System.out.println("2.) Raise");
@@ -26,7 +28,24 @@ public class UserPlayer extends Player{
         }
     }
 
-    protected int chooseDiscards(){
+    protected ArrayList<Integer> chooseDiscards(BufferedReader mainReader){
+        ArrayList<Integer> discards = new ArrayList<>()
 
+        for(int i = 0; i < hand.size(); i++){
+            Card card = hand.get(i);
+            System.out.prinln(Integer.toString(i + 1) + ".) " + card.display());
+        }
+
+        System.out.println("Which cards would you like to discard? (max 3. Format '1 4 5')");
+        String choices = mainReader.readLine();
+        for (String number : s.split(" ")){
+            discards.add(hand.get(i - 1)); // add exception handling
+        }
+
+        if (discards.size() > 3){
+            discards = chooseDiscards(mainReader);
+        }
+
+        return discards;
     }
 }
