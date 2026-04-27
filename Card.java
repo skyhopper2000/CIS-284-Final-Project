@@ -8,7 +8,7 @@ public class Card {
         this.rank = rank;
         this.value = value;
     }
-
+public String toString() {
         return rank + " of " + suit;
     }
 }
