@@ -1,14 +1,15 @@
 public class Player{
 
-    protected int[] hand = {1, 2, 3, 4, 5};
+    protected Hand hand;
     protected int chips;
     public String decision = "UNDECIDED";
     public int currentBet = 0;
     public Boolean isDealer = false;
     public String name;
 
-    Player(int chips){
+    Player(int chips, ArrayList<Card> newHand){
         this.chips = chips;
+        this.hand = new Hand(newHand);
     }
 
     protected int getChips(){

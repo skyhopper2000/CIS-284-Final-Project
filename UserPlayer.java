@@ -1,10 +1,11 @@
 import java.io.BufferedReader;
 import java.util.ArrayList;
 
+
 public class UserPlayer extends Player{
     
-    UserPlayer(int chips, String name){
-        super(chips);
+    UserPlayer(int chips, ArrayList<Card> newHand, String name){
+        super(chips, newHand);
         this.name = name;
     }
 
