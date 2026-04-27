@@ -27,4 +27,14 @@ public class DeckManager {
         }
         return null;
     }
+
+    public ArrayList<Card> drawCards(int num){
+        ArrayList<Card> outList = new ArrayList<>();
+        for(int i=0; i < num; i++){
+            outList.add(drawCard());
+        }
+        return outList;
+    }
+
+    
 }

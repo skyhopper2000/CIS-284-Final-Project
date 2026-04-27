@@ -75,8 +75,12 @@ public class mainApp {
     System.out.println("How many computer players?");
     try{
 
+      DeckManager playDeck = new DeckManager();
+      playDeck.shuffle()
+
       numNPCs = Integer.parseInt(mainReader.readLine());
       for (int i = 0; i < numNPCs; i++){
+        playDeck.drawCards(5);
         computerPlayers.add(new ComputerPlayer(150));
       }
       
@@ -124,6 +128,7 @@ public class mainApp {
           Thread.sleep(1000);
         }
 
+        drawBoardStatus();
         // draw
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
@@ -171,6 +176,7 @@ public class mainApp {
         }
         System.out.println("Would you like to play another round? (y/n)");
         String playAnother = mainReader.readLine()
+
       } while (playAnother == "y");
     // Exception handling, prevents exiting application prematurely on an error
     } catch (IOException e){

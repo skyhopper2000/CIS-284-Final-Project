@@ -1,11 +1,14 @@
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.smartcardio.Card;
 
 public class pokerUtils {
     public static int randInt(int min, int max){
         int randomInt = min + (int)(Math.random() * (max - min + 1));
         return randomInt;
     }
-
+ 
     public static int evaluateHandType(Hand hand) {
         if (hand.isRoyalFlush()) return 10;
         if (hand.isStraightFlush()) return 9;
@@ -19,6 +22,34 @@ public class pokerUtils {
         return 1;
     }
 
+    public static int evaluateHandRank(Hand hand){
+        HashMap<Integer, Integer> counts = new HashMap<>();
+
+        // count card values
+        for (Card c : hand.getCards()) {
+            int val = c.getValue();
+            counts.put(val, counts.getOrDefault(val, 0) + 1);
+        }
+
+        // Find the highest ranking card of the highest value set
+        // I am 99% certain that this will handle all edge cases
+        int dominantValue = 0;
+        int dominantValueTier = 0;
+        while(int nOfAKind = 1; nOfAKind < 5; nOfAKind++){
+            for (int i = 0; i < hand.getCards().size(); i++) {
+                Card c = hand.getCards().get(i);
+                if (counts.get(c.getValue()) == nOfAKind){
+                    if ((c.getValue() > dominantValue) && (nOfAKind >= dominantValueTier)){
+                        dominantValue = c.getValue();
+                        dominantValueTier = nOfAKind;
+                    }
+                }
+            }
+        }
+
+        return dominantValue;
+    }
+
     public static ArrayList<Player> showdown(ArrayList<Player> players){
         int index = 0;
         int numTiedPlayers = 0;
@@ -30,7 +61,7 @@ public class pokerUtils {
                 topPlayer = player;
                 numTiedPlayers = 0;
             } else if(evaluateHandType(player.getHand()) < evaluateHandType(topPlayer.getHand())) {
-                players.remove(player)
+                players.remove(player);
             } else {
                 numTiedPlayers++;
             }
@@ -46,4 +77,5 @@ public class pokerUtils {
         }
         return players;
     }
+
 }

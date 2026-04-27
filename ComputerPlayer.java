@@ -11,8 +11,8 @@ public class ComputerPlayer extends Player {
 
     private Random rand = new Random();
 
-    ComputerPlayer(int chips){
-        super(chips);
+    ComputerPlayer(int chips, ArrayList<Card> newHand){
+        super(chips, newHand);
         this.name = nameList[pokerUtils.randInt(0, nameList.length - 1)];
     }
 
