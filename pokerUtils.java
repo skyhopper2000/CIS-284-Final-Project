@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.smartcardio.Card;
+
 
 public class pokerUtils {
     public static int randInt(int min, int max){
@@ -10,6 +10,7 @@ public class pokerUtils {
     }
  
     public static int evaluateHandType(Hand hand) {
+        // returns the relative precedence of hands
         if (hand.isRoyalFlush()) return 10;
         if (hand.isStraightFlush()) return 9;
         if (hand.isFourOfAKind()) return 8;
@@ -51,31 +52,43 @@ public class pokerUtils {
     }
 
     public static ArrayList<Player> showdown(ArrayList<Player> players){
+        /*
+        Calculates the winner of the showdown
+        The logic here is omewhat shakey but walk with me here
+        */
+
+        // setup
         int index = 0;
         int numTiedPlayers = 0;
-        Player topPlayer = players.get(index);
-        while(numTiedPlayers != players.size()){
-            Player player = players.get(index);
+        ArrayList<Player> remainingPlayers = players;
+
+        // Find the player(s) with the most powerful type of hand
+        Player topPlayer = remainingPlayers.get(index);
+        while(numTiedPlayers != remainingPlayers.size()){
+            Player player = remainingPlayers.get(index);
             if (evaluateHandType(player.getHand()) > evaluateHandType(topPlayer.getHand())){
-                players.remove(topPlayer);
+                remainingPlayers.remove(topPlayer);
                 topPlayer = player;
                 numTiedPlayers = 0;
             } else if(evaluateHandType(player.getHand()) < evaluateHandType(topPlayer.getHand())) {
-                players.remove(player);
+                remainingPlayers.remove(player);
             } else {
                 numTiedPlayers++;
             }
             index++;
         }
-        for (Player player : players){
-            if (evaluateHandRank(player.getHand()) > evaluateHandRank(topPlayer.getHand())){
-                players.remove(topPlayer);
-                topPlayer = player;
-            } else if(evaluateHandRank(player.getHand()) < evaluateHandRank(topPlayer.getHand())){
-                players.remove(player);
+        // if there is a tie, find the high card in the highest group
+        if (remainingPlayers.size != 1){
+            for (Player player : remainingPlayers){
+                if (evaluateHandRank(player.getHand()) > evaluateHandRank(topPlayer.getHand())){
+                    remainingPlayers.remove(topPlayer);
+                    topPlayer = player;
+                } else if(evaluateHandRank(player.getHand()) < evaluateHandRank(topPlayer.getHand())){
+                    remainingPlayers.remove(player);
+                }
             }
         }
-        return players;
+        return remainingPlayers;
     }
 
 }

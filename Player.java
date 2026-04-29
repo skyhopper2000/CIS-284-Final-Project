@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Player{
 
     protected Hand hand;
@@ -8,15 +10,16 @@ public class Player{
     public String name;
 
     Player(int chips, ArrayList<Card> newHand){
+        /*
+        Parent class for UserPlayer and ComputerPlayer
+        Can be initialized on its own, but is not initialized in the course of the game
+        */
         this.chips = chips;
         this.hand = new Hand(newHand);
     }
 
-    protected int getChips(){
-        return chips;
-    }
-
     protected void placeBet(int amount){
+        // increases the amount being bet
         if (amount < chips - currentBet){
             currentBet = currentBet + amount;
         }else{
@@ -28,10 +31,10 @@ public class Player{
         this.decision = decision;
         switch (decision){
             case "RAISE":
-                currentBet = currentBet + highestBet;
+                placeBet(currentBet + highestBet);
                 break;
             case "CALL":
-                currentBet = highestBet;
+                placeBet(highestBet);
                 break;
             case "FOLD":
                 break;
@@ -41,6 +44,10 @@ public class Player{
                 System.out.println("Invalid choice " + decision);
                 break;
         }
+    }
+
+    protected int getChips(){
+        return chips;
     }
 
     protected String getDecision(){
