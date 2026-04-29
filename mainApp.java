@@ -102,7 +102,7 @@ public class mainApp {
         // display board status
         drawBoardStatus();
 
-        // pay ante
+        // ===== PAY ANTE ===== //
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
           player.placeBet(1);
@@ -111,25 +111,32 @@ public class mainApp {
         Player dealer = table.get(0);
         dealer.placeBet(1);
         System.out.println("Dealer paid ante");
+        // ===== END PAY ANTE ===== //
+
         drawBoardStatus();
 
-        // first betting
+        // ===== FIRST BETTING ===== //
         int playerIndex = 0;
         while(inPlay(table)){
+          // loop over table
           playerIndex++;
           Player player = table.get(playerIndex);
+          // don't bet players who have folded
           if (player.getDecision() == "FOLD"){
             System.out.println(player.getName() + " has already folded.");
             continue;
           }
+          // otherwise, make decision
           String newDecision = player.makeDecision();
           player.setDecision(newDecision);
           System.out.println(player.getName() + " has decided to " + newDecision);
           Thread.sleep(1000);
         }
+        // ===== END FIRST BETTING ===== //
 
         drawBoardStatus();
-        // draw
+
+        // ===== DRAW STEP ====== //
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
           if (player.getDecision() != "FOLD"){
@@ -138,14 +145,17 @@ public class mainApp {
             Thread.sleep(1000);
           }
         }
+        // ===== END DRAW STEP ===== //
 
-        // second betting
+        // ===== SECOND BETTING ===== //
+        // set aside all folded players
         for (int i = 0; i < table.size(); i++){
           Player player = table.get(i);
           if (player.getDecision() != "FOLD"){
             player.setDecision("UNDECIDED", highestBet);
           }
         }
+        // loop over unfolded players
         playerIndex = 0;
         while(inPlay(table)){
           playerIndex++;
@@ -159,21 +169,27 @@ public class mainApp {
           System.out.println(player.getName() + " has decided to " + newDecision);
           Thread.sleep(1000);
         }
+        // ===== END SECOND BETTING ===== //
         
-        // showdown
-        ArrayList<Player> showdownPlayers = new ArrayList<>();
+        // ====== SHOWDOWN ===== //
+        ArrayList<Player> showdownPlayers = new ArrayList<>(); // isolate players in a showdown
         for (int i = 0; i < table.size(); i++){
           Player player = table.get(i);
           if (player.getDecision() != "FOLD"){
             showdownPlayers.add(player);
-            System.err.println(player.getName() + ": " + player.getHand().toString()); //future hand.display()
+            System.err.println(player.getName() + ": " + player.getHand().display()); //future hand.display()
           }
         }
         ArrayList<Player> winners = showdown(showdownPlayers);
+        // ===== END SHOWDOWN ===== //
+
+        // ===== RESOLUTION ===== //
         System.out.println("Winner(s): ");
         for(Player player in winners){
           system.out.print(player.getName() + " ")
         }
+
+        // ===== CONTINUE ===== //
         System.out.println("Would you like to play another round? (y/n)");
         String playAnother = mainReader.readLine()
 
