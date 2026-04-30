@@ -1,6 +1,7 @@
+import java.io.BufferedReader;
 import java.util.ArrayList;
 
-public class Player{
+abstract public class Player{
 
     protected Hand hand;
     protected int chips;
@@ -15,7 +16,10 @@ public class Player{
         Can be initialized on its own, but is not initialized in the course of the game
         */
         this.chips = chips;
-        this.hand = new Hand(newHand);
+        this.hand = new Hand();
+        for (Card card : newHand){
+            this.hand.addCard(card);
+        }
     }
 
     protected void placeBet(int amount){
@@ -51,14 +55,14 @@ public class Player{
     }
 
     protected String getDecision(){
-        return getDecision();
+        return decision;
     }
 
     protected String getName(){
         return name;
     }
 
-    protected int[] getHand(){
+    protected Hand getHand(){
         return hand;
     }
 
@@ -71,8 +75,8 @@ public class Player{
         isDealer = true;
     }
 
-    abstract protected String makeDecision(int currentBet);
+    abstract protected String makeDecision(int currentBet, BufferedReader mainReader);
 
-    abstract protected int chooseDiscards();
+    abstract protected ArrayList<Card> chooseDiscards(BufferedReader mainReader);
 
 }

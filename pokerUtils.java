@@ -36,7 +36,7 @@ public class pokerUtils {
         // I am 99% certain that this will handle all edge cases
         int dominantValue = 0;
         int dominantValueTier = 0;
-        while(int nOfAKind = 1; nOfAKind < 5; nOfAKind++){
+        for(int nOfAKind = 1; nOfAKind < 5; nOfAKind++){
             for (int i = 0; i < hand.getCards().size(); i++) {
                 Card c = hand.getCards().get(i);
                 if (counts.get(c.getValue()) == nOfAKind){
@@ -78,7 +78,7 @@ public class pokerUtils {
             index++;
         }
         // if there is a tie, find the high card in the highest group
-        if (remainingPlayers.size != 1){
+        if (remainingPlayers.size() != 1){
             for (Player player : remainingPlayers){
                 if (evaluateHandRank(player.getHand()) > evaluateHandRank(topPlayer.getHand())){
                     remainingPlayers.remove(topPlayer);

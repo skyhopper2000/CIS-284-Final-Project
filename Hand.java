@@ -1,5 +1,6 @@
 import java.util.*;
 
+
 public class Hand {
     private ArrayList<Card> cards = new ArrayList<>();
 
@@ -18,6 +19,38 @@ public class Hand {
     }
 
     public boolean isPair() {
+        return true;
+    }
+
+    public boolean isTwoPair() {
+        return false;
+    }
+
+    public boolean isThreeOfAKind() {
+        return false;
+    }
+
+    public boolean isStraight() {
+        return false;
+    }
+
+    public boolean isFlush() {
+        return false;
+    }
+
+    public boolean isFullHouse() {
+        return false;
+    }
+
+    public boolean isFourOfAKind() {
+        return false;
+    }
+
+    public boolean isStraightFlush() {
+        return false;
+    }
+
+    public boolean isRoyalFlush() {
         return false;
     }
     

@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
+
 public class mainApp {
 
   static ArrayList<Player> computerPlayers = new ArrayList<>();
@@ -73,20 +74,22 @@ public class mainApp {
     BufferedReader mainReader = new BufferedReader(new InputStreamReader(System.in));
     System.out.println("Welcome to: 5-Card Draw Poker!");
     System.out.println("How many computer players?");
+    String playAnother = "n";
     try{
 
       DeckManager playDeck = new DeckManager();
-      playDeck.shuffle()
+      playDeck.shuffle();
 
       numNPCs = Integer.parseInt(mainReader.readLine());
       for (int i = 0; i < numNPCs; i++){
-        playDeck.drawCards(5);
-        computerPlayers.add(new ComputerPlayer(150));
+        ArrayList<Card> dealtCards = playDeck.drawCards(5);
+        computerPlayers.add(new ComputerPlayer(150, dealtCards));
       }
       
       System.out.println("What is your name?");
       String playerName = mainReader.readLine();
-      userPlayer = new UserPlayer(150, playerName);
+      ArrayList<Card> dealtCards = playDeck.drawCards(5);
+      userPlayer = new UserPlayer(150, dealtCards, playerName);
       table.add(userPlayer);
       table.addAll(computerPlayers);
       table.get(pokerUtils.randInt(0, table.size() - 1)).assignDealer();
@@ -127,8 +130,8 @@ public class mainApp {
             continue;
           }
           // otherwise, make decision
-          String newDecision = player.makeDecision();
-          player.setDecision(newDecision);
+          String newDecision = player.makeDecision(highestBet, mainReader);
+          player.setDecision(newDecision, highestBet);
           System.out.println(player.getName() + " has decided to " + newDecision);
           Thread.sleep(1000);
         }
@@ -140,7 +143,7 @@ public class mainApp {
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
           if (player.getDecision() != "FOLD"){
-            ArrayList<int> discards = player.chooseDiscards();
+            ArrayList<Card> discards = player.chooseDiscards(mainReader);
             System.out.println(player.getName() + " discarded " + discards.size() + "cards.");
             Thread.sleep(1000);
           }
@@ -164,8 +167,8 @@ public class mainApp {
             System.out.println(player.getName() + " has already folded.");
             continue;
           }
-          String newDecision = player.makeDecision();
-          player.setDecision(newDecision);
+          String newDecision = player.makeDecision(highestBet, mainReader);
+          player.setDecision(newDecision, highestBet);
           System.out.println(player.getName() + " has decided to " + newDecision);
           Thread.sleep(1000);
         }
@@ -177,21 +180,21 @@ public class mainApp {
           Player player = table.get(i);
           if (player.getDecision() != "FOLD"){
             showdownPlayers.add(player);
-            System.err.println(player.getName() + ": " + player.getHand().display()); //future hand.display()
+            System.err.println(player.getName() + ": " + player.getHand().toString());
           }
         }
-        ArrayList<Player> winners = showdown(showdownPlayers);
+        ArrayList<Player> winners = pokerUtils.showdown(showdownPlayers);
         // ===== END SHOWDOWN ===== //
 
         // ===== RESOLUTION ===== //
         System.out.println("Winner(s): ");
-        for(Player player in winners){
-          system.out.print(player.getName() + " ")
+        for(Player player : winners){
+          System.out.print(player.getName() + " ");
         }
 
         // ===== CONTINUE ===== //
         System.out.println("Would you like to play another round? (y/n)");
-        String playAnother = mainReader.readLine()
+        playAnother = mainReader.readLine();
 
       } while (playAnother == "y");
     // Exception handling, prevents exiting application prematurely on an error
@@ -200,6 +203,8 @@ public class mainApp {
     } catch (NumberFormatException n){
         System.out.println("Invalid input.");
         System.out.println("Reader Exception: " + n);
+    } catch (InterruptedException ie) {
+      System.out.println("Thread interrupted");
     }
   }
 }

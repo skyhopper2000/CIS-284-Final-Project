@@ -1,5 +1,5 @@
 
-
+import java.io.BufferedReader;
 import java.util.*;
 
 public class ComputerPlayer extends Player {
@@ -32,8 +32,8 @@ public class ComputerPlayer extends Player {
     }
 
     // ===== DISCARD LOGIC =====
-    public ArrayList<Integer> chooseDiscards() {
-        ArrayList<Integer> discards = new ArrayList<>();
+    protected ArrayList<Card> chooseDiscards(BufferedReader mainReader) {
+        ArrayList<Card> discards = new ArrayList<>();
         HashMap<Integer, Integer> counts = new HashMap<>();
 
         // count card values
@@ -46,7 +46,7 @@ public class ComputerPlayer extends Player {
         for (int i = 0; i < hand.getCards().size(); i++) {
             Card c = hand.getCards().get(i);
             if (counts.get(c.getValue()) == 1) {
-                discards.add(i);
+                discards.add(c);
             }
         }
 
@@ -59,7 +59,7 @@ public class ComputerPlayer extends Player {
     }
 
     // ===== BETTING LOGIC =====
-    public String makeDecision(int currentBet) {
+    public String makeDecision(int currentBet, BufferedReader mainReader) {
         int strength = evaluateHand();
 
         // strong hand → play aggressive
@@ -82,6 +82,7 @@ public class ComputerPlayer extends Player {
         return "FOLD";
     }
 
+    /* DEPRECATED
     // ===== TAKE TURN (PUTS IT ALL TOGETHER) =====
     public void takeTurn(Deck deck, int currentBet) {
 
@@ -97,4 +98,5 @@ public class ComputerPlayer extends Player {
 
         System.out.println(name + " chooses to " + decision);
     }
+        */
 }
