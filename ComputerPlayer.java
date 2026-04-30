@@ -1,5 +1,3 @@
-
-import java.io.BufferedReader;
 import java.util.*;
 
 public class ComputerPlayer extends Player {
@@ -11,13 +9,12 @@ public class ComputerPlayer extends Player {
 
     private Random rand = new Random();
 
-    ComputerPlayer(int chips, ArrayList<Card> newHand){
-        super(chips, newHand);
+    ComputerPlayer(int chips){
+        super(chips);
         this.name = nameList[pokerUtils.randInt(0, nameList.length - 1)];
     }
 
     // ===== HAND STRENGTH =====
-    // simple ranking system (higher = better)
     public int evaluateHand() {
         if (hand.isRoyalFlush()) return 10;
         if (hand.isStraightFlush()) return 9;
@@ -32,25 +29,28 @@ public class ComputerPlayer extends Player {
     }
 
     // ===== DISCARD LOGIC =====
-    protected ArrayList<Card> chooseDiscards(BufferedReader mainReader) {
-        ArrayList<Card> discards = new ArrayList<>();
+    public ArrayList<Integer> chooseDiscards() {
+        ArrayList<Integer> discards = new ArrayList<>();
         HashMap<Integer, Integer> counts = new HashMap<>();
 
-        // count card values
         for (Card c : hand.getCards()) {
             int val = c.getValue();
             counts.put(val, counts.getOrDefault(val, 0) + 1);
         }
 
-        // discard cards that are not part of pairs or better
         for (int i = 0; i < hand.getCards().size(); i++) {
             Card c = hand.getCards().get(i);
+
             if (counts.get(c.getValue()) == 1) {
-                discards.add(c);
+                discards.add(i);
             }
         }
 
-        // don’t discard too many cards (max 3)
+        // small randomness so bots aren't predictable
+        if (discards.size() > 0 && rand.nextInt(100) < 30) {
+            discards.remove(rand.nextInt(discards.size()));
+        }
+
         while (discards.size() > 3) {
             discards.remove(discards.size() - 1);
         }
@@ -58,32 +58,29 @@ public class ComputerPlayer extends Player {
         return discards;
     }
 
-    // ===== BETTING LOGIC =====
-    public String makeDecision(int currentBet, BufferedReader mainReader) {
+    // ===== BETTING LOGIC (MORE AGGRESSIVE) =====
+    public String makeDecision(int currentBet) {
         int strength = evaluateHand();
+        int roll = rand.nextInt(100);
 
-        // strong hand → play aggressive
-        if (strength >= 7) {
-            return "RAISE";
-        }
-
-        // medium hand → play safe
-        if (strength >= 4) {
+        if (strength >= 6) {
+            if (roll < 70) return "RAISE";
             return "CALL";
         }
 
-        // weak hand → sometimes bluff
-        int bluffChance = rand.nextInt(100);
-
-        if (bluffChance < 20) {
-            return "CALL"; // bluff
+        if (strength >= 3) {
+            if (roll < 30) return "RAISE";
+            if (roll < 85) return "CALL";
+            return "FOLD";
         }
+
+        if (roll < 40) return "CALL";  
+        if (roll < 50) return "RAISE";
 
         return "FOLD";
     }
 
-    /* DEPRECATED
-    // ===== TAKE TURN (PUTS IT ALL TOGETHER) =====
+    // ===== TURN LOGIC =====
     public void takeTurn(Deck deck, int currentBet) {
 
         // discard phase
@@ -93,10 +90,9 @@ public class ComputerPlayer extends Player {
             hand.replaceCard(index, deck.drawCard());
         }
 
-        // betting decision
+        // decision phase
         String decision = makeDecision(currentBet);
 
         System.out.println(name + " chooses to " + decision);
     }
-        */
 }
