@@ -1,3 +1,4 @@
+}
 import java.util.*;
 
 public class ComputerPlayer extends Player {
@@ -15,6 +16,7 @@ public class ComputerPlayer extends Player {
     }
 
     // ===== HAND STRENGTH =====
+    // simple ranking system (higher = better)
     public int evaluateHand() {
         if (hand.isRoyalFlush()) return 10;
         if (hand.isStraightFlush()) return 9;
@@ -33,24 +35,21 @@ public class ComputerPlayer extends Player {
         ArrayList<Integer> discards = new ArrayList<>();
         HashMap<Integer, Integer> counts = new HashMap<>();
 
+        // count card values
         for (Card c : hand.getCards()) {
             int val = c.getValue();
             counts.put(val, counts.getOrDefault(val, 0) + 1);
         }
 
+        // discard cards that are not part of pairs or better
         for (int i = 0; i < hand.getCards().size(); i++) {
             Card c = hand.getCards().get(i);
-
             if (counts.get(c.getValue()) == 1) {
                 discards.add(i);
             }
         }
 
-        // small randomness so bots aren't predictable
-        if (discards.size() > 0 && rand.nextInt(100) < 30) {
-            discards.remove(rand.nextInt(discards.size()));
-        }
-
+        // don’t discard too many cards (max 3)
         while (discards.size() > 3) {
             discards.remove(discards.size() - 1);
         }
@@ -58,29 +57,31 @@ public class ComputerPlayer extends Player {
         return discards;
     }
 
-    // ===== BETTING LOGIC (MORE AGGRESSIVE) =====
+    // ===== BETTING LOGIC =====
     public String makeDecision(int currentBet) {
         int strength = evaluateHand();
-        int roll = rand.nextInt(100);
 
-        if (strength >= 6) {
-            if (roll < 70) return "RAISE";
+        // strong hand → play aggressive
+        if (strength >= 7) {
+            return "RAISE";
+        }
+
+        // medium hand → play safe
+        if (strength >= 4) {
             return "CALL";
         }
 
-        if (strength >= 3) {
-            if (roll < 30) return "RAISE";
-            if (roll < 85) return "CALL";
-            return "FOLD";
-        }
+        // weak hand → sometimes bluff
+        int bluffChance = rand.nextInt(100);
 
-        if (roll < 40) return "CALL";  
-        if (roll < 50) return "RAISE";
+        if (bluffChance < 20) {
+            return "CALL"; // bluff
+        }
 
         return "FOLD";
     }
 
-    // ===== TURN LOGIC =====
+    // ===== TAKE TURN (PUTS IT ALL TOGETHER) =====
     public void takeTurn(Deck deck, int currentBet) {
 
         // discard phase
@@ -90,7 +91,7 @@ public class ComputerPlayer extends Player {
             hand.replaceCard(index, deck.drawCard());
         }
 
-        // decision phase
+        // betting decision
         String decision = makeDecision(currentBet);
 
         System.out.println(name + " chooses to " + decision);
