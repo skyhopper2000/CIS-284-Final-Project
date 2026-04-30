@@ -1,22 +1,29 @@
 # CIS 284 Final Project
 Java Terminal Game, 5 card draw with bots
 
-### Not Started
-- [ ] Card system - 
-  - [ ] Card class
-  - [ ] Deck class
+
+- [ ] Card system - Spencer
+  - [x] Card class
+  - [x] Deck class
   - [ ] Hand class
+    - [ ] What still needs done: the hand class needs functions which identify the type of hand to work with computerPlayer.evaluateHand()
+          ```
+          public Boolean isPair() {
+          } // methods like this
+          ```
 - [ ] Gameplay System - Quentin
-  - [ ] UI
-    - [ ] Card Graphics
+  - [x] UI
     - [ ] Menu
     - [ ] Board Graphics
-  - [ ] Persistent Data?
-- [ ] Computer Players - 
+      - [ ] What still needs done: debugging, exception handling, play-testing
+  - [ ] Persistent Data - Spencer
+- [ ] Computer Players - Jose
   - [ ] Logic
-  - [ ] Implementation
+    - [ ] What still needs done: adjust the computer behavior so that it calls/raises more often. Ways to go about this:
+          
+           - Increased randomness
+           - Evaluate rank of cards in hand
+           - Lower the call and raise thresholds
+           - etc.
+    - [x] Implementation
 
-### In-Progress
-
-
-### Completed Column ✓
