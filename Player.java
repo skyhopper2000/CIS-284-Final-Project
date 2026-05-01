@@ -1,7 +1,7 @@
 import java.io.BufferedReader;
 import java.util.ArrayList;
 
-abstract public class Player{
+abstract public class Player {
 
     protected Hand hand;
     protected int chips;
@@ -10,35 +10,37 @@ abstract public class Player{
     public Boolean isDealer = false;
     public String name;
 
-    Player(int chips, ArrayList<Card> newHand){
-        /*
-        Parent class for UserPlayer and ComputerPlayer
-        Can be initialized on its own, but is not initialized in the course of the game
-        */
+    Player(int chips, ArrayList<Card> newHand) {
         this.chips = chips;
         this.hand = new Hand();
-        for (Card card : newHand){
+        for (Card card : newHand) {
             this.hand.addCard(card);
         }
     }
 
-    Player(int chips){
+    Player(int chips) {
         this.chips = chips;
         this.hand = new Hand();
     }
 
-    protected void placeBet(int amount){
-        // increases the amount being bet
-        if (amount < chips - currentBet){
+    protected void placeBet(int amount) {
+        // FIX: was `< chips - currentBet`, which rejected valid equal bets (e.g. going all-in)
+        if (amount <= chips - currentBet) {
             currentBet = currentBet + amount;
-        }else{
+        } else {
             System.out.println("Invalid bet");
         }
     }
 
-    protected void setDecision(String decision, int highestBet){
+    // FIX: Reset currentBet and decision at the start of each round
+    protected void resetForNewRound() {
+        this.decision = "UNDECIDED";
+        this.currentBet = 0;
+    }
+
+    protected void setDecision(String decision, int highestBet) {
         this.decision = decision;
-        switch (decision){
+        switch (decision) {
             case "RAISE":
                 placeBet(currentBet + highestBet);
                 break;
@@ -55,33 +57,19 @@ abstract public class Player{
         }
     }
 
-    protected int getChips(){
-        return chips;
+    protected int getChips() { return chips; }
+    protected String getDecision() { return decision; }
+    protected String getName() { return name; }
+    protected Hand getHand() { return hand; }
+
+    protected String displayIsDealer() {
+        return isDealer ? "*" : "";
     }
 
-    protected String getDecision(){
-        return decision;
-    }
-
-    protected String getName(){
-        return name;
-    }
-
-    protected Hand getHand(){
-        return hand;
-    }
-
-    protected String displayIsDealer(){
-        if (isDealer) return "*";
-        else return "";
-    }
-
-    protected void assignDealer(){
+    protected void assignDealer() {
         isDealer = true;
     }
 
     abstract protected String makeDecision(int currentBet, BufferedReader mainReader);
-
     abstract protected ArrayList<Card> chooseDiscards(BufferedReader mainReader);
-
 }
