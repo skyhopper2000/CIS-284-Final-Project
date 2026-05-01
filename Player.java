@@ -21,60 +21,44 @@ abstract public class Player {
         this.hand = new Hand();
     }
 
-    protected boolean placeBet(int amount) {
-        int additionalCost = amount - currentBet;
-        if (additionalCost <= 0) {
-            return true; // already covered, nothing to do
+    protected void placeBet(int amount){
+        // increases the amount being bet
+        if (amount < chips - currentBet){
+            currentBet = currentBet + amount;
+        }else{
+            System.out.println("Invalid bet");
         }
-        if (additionalCost <= chips) {
-            chips -= additionalCost;
-            currentBet = amount;
-            return true;
-        }
-
-        System.out.println(name + " can't afford that bet (needs " + additionalCost
-                + ", has " + chips + "). Forced to fold.");
-        return false;
     }
 
-    protected void resetForNewRound() {
-        this.decision = "UNDECIDED";
-        this.currentBet = 0;
-    }
-
-    protected String setDecision(String decision, int highestBet) {
-        switch (decision) {
-            case "RAISE": {
-                int raiseTarget = highestBet + 10;
-                if (!placeBet(raiseTarget)) {
-                    this.decision = "FOLD";
-                    return "FOLD";
-                }
-                this.decision = "RAISE";
+    protected void setDecision(String decision, int highestBet){
+        this.decision = decision;
+        switch (decision){
+            case "RAISE":
+                placeBet(currentBet + highestBet);
                 break;
-            }
-            case "CALL": {
-                if (!placeBet(highestBet)) {
-                    this.decision = "FOLD";
-                    return "FOLD";
-                }
-                this.decision = "CALL";
+            case "CALL":
+                placeBet(highestBet);
                 break;
-            }
             case "FOLD":
-                this.decision = "FOLD";
                 break;
             case "UNDECIDED":
-                this.decision = "UNDECIDED";
                 break;
             default:
-                System.out.println("Invalid choice: " + decision);
-                this.decision = "CALL";
+                System.out.println("Invalid choice " + decision);
                 break;
         }
-        return this.decision;
     }
 
+    protected void resolveRound(Boolean isWinner, int pot){
+        if (isWinner){
+            chips = chips + pot;
+        } else {
+            chips = chips - currentBet;
+        }
+        decision = "UNDECIDED";
+        currentBet = 0;
+    }
+    
     protected int getChips()        { return chips; }
     protected String getDecision()  { return decision; }
     protected String getName()      { return name; }
