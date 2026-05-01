@@ -7,15 +7,13 @@ abstract public class Player {
     protected int chips;
     public String decision = "UNDECIDED";
     public int currentBet = 0;
-    public Boolean isDealer = false;
+    public boolean isDealer = false;
     public String name;
 
     Player(int chips, ArrayList<Card> newHand) {
         this.chips = chips;
         this.hand = new Hand();
-        for (Card card : newHand) {
-            this.hand.addCard(card);
-        }
+        for (Card card : newHand) this.hand.addCard(card);
     }
 
     Player(int chips) {
@@ -23,52 +21,67 @@ abstract public class Player {
         this.hand = new Hand();
     }
 
-    protected void placeBet(int amount) {
-        // FIX: was `< chips - currentBet`, which rejected valid equal bets (e.g. going all-in)
-        if (amount <= chips - currentBet) {
-            currentBet = currentBet + amount;
-        } else {
-            System.out.println("Invalid bet");
+    protected boolean placeBet(int amount) {
+        int additionalCost = amount - currentBet;
+        if (additionalCost <= 0) {
+            return true; // already covered, nothing to do
         }
+        if (additionalCost <= chips) {
+            chips -= additionalCost;
+            currentBet = amount;
+            return true;
+        }
+
+        System.out.println(name + " can't afford that bet (needs " + additionalCost
+                + ", has " + chips + "). Forced to fold.");
+        return false;
     }
 
-    // FIX: Reset currentBet and decision at the start of each round
     protected void resetForNewRound() {
         this.decision = "UNDECIDED";
         this.currentBet = 0;
     }
 
-    protected void setDecision(String decision, int highestBet) {
-        this.decision = decision;
+    protected String setDecision(String decision, int highestBet) {
         switch (decision) {
-            case "RAISE":
-                placeBet(currentBet + highestBet);
+            case "RAISE": {
+                int raiseTarget = highestBet + 10;
+                if (!placeBet(raiseTarget)) {
+                    this.decision = "FOLD";
+                    return "FOLD";
+                }
+                this.decision = "RAISE";
                 break;
-            case "CALL":
-                placeBet(highestBet);
+            }
+            case "CALL": {
+                if (!placeBet(highestBet)) {
+                    this.decision = "FOLD";
+                    return "FOLD";
+                }
+                this.decision = "CALL";
                 break;
+            }
             case "FOLD":
+                this.decision = "FOLD";
                 break;
             case "UNDECIDED":
+                this.decision = "UNDECIDED";
                 break;
             default:
-                System.out.println("Invalid choice " + decision);
+                System.out.println("Invalid choice: " + decision);
+                this.decision = "CALL";
                 break;
         }
+        return this.decision;
     }
 
-    protected int getChips() { return chips; }
-    protected String getDecision() { return decision; }
-    protected String getName() { return name; }
-    protected Hand getHand() { return hand; }
+    protected int getChips()        { return chips; }
+    protected String getDecision()  { return decision; }
+    protected String getName()      { return name; }
+    protected Hand getHand()        { return hand; }
 
-    protected String displayIsDealer() {
-        return isDealer ? "*" : "";
-    }
-
-    protected void assignDealer() {
-        isDealer = true;
-    }
+    protected String displayIsDealer() { return isDealer ? "*" : ""; }
+    protected void assignDealer()      { isDealer = true; }
 
     abstract protected String makeDecision(int currentBet, BufferedReader mainReader);
     abstract protected ArrayList<Card> chooseDiscards(BufferedReader mainReader);
