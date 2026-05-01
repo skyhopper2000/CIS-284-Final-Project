@@ -185,16 +185,15 @@ public class mainApp {
                     int share = pot / winners.size();
 
                     System.out.print("Winner(s): ");
+                    for (Player player : table) {
+                        // Deduct each player's contribution
+                        int contribution = round1Contributions.getOrDefault(player, 0);
+                        player.chips -= contribution;
+                    }
                     for (Player player : winners) {
                         System.out.print(player.getName() + " ");
                         player.chips += share;
                     }
-                    for (Player player : table){
-                      if(!winners.contains(player)){
-                        player.chips = player.chips - player.currentBet;
-                      }
-                    }
-                    
                     System.out.println("\nPot of " + pot + " chip(s) split "
                             + winners.size() + " way(s) (" + share + " each).");
                 }
