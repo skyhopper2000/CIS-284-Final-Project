@@ -22,6 +22,11 @@ abstract public class Player{
         }
     }
 
+    Player(int chips){
+        this.chips = chips;
+        this.hand = new Hand();
+    }
+
     protected void placeBet(int amount){
         // increases the amount being bet
         if (amount < chips - currentBet){
