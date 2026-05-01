@@ -163,7 +163,7 @@ public class mainApp {
         while(inPlay(table)){
           playerIndex = (playerIndex + 1) % table.size();
           Player player = table.get(playerIndex);
-          if (player.getDecision() == "FOLD"){
+          if (player.getDecision().equals("FOLD")){
             System.out.println(player.getName() + " has already folded.");
             continue;
           }
