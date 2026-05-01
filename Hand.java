@@ -54,15 +54,30 @@ public class Hand {
         return getRankCounts().containsValue(4);
     }
 
-    public boolean isStraight() { return false; } 
-    public boolean isStraightFlush() { return false; }
-    public boolean isRoyalFlush() { return false; }
-    
-    @Override
-    public String toString() {
-        return cards.toString();
+    public boolean isStraight() {
+        // Sort card values, then check they form a consecutive sequence
+        ArrayList<Integer> values = new ArrayList<>();
+        for (Card c : cards) values.add(c.getValue());
+        Collections.sort(values);
+        for (int i = 1; i < values.size(); i++) {
+            if (values.get(i) != values.get(i - 1) + 1) return false;
+        }
+        return true;
     }
-}
+
+    public boolean isStraightFlush() {
+        return isFlush() && isStraight();
+    }
+
+    public boolean isRoyalFlush() {
+        if (!isFlush()) return false;
+        ArrayList<Integer> values = new ArrayList<>();
+        for (Card c : cards) values.add(c.getValue());
+        Collections.sort(values);
+        // Royal flush: 10, J(11), Q(12), K(13), A(14)
+        return values.equals(Arrays.asList(10, 11, 12, 13, 14));
+    }
+
     @Override
     public String toString() {
         return cards.toString();
