@@ -9,8 +9,8 @@ public class ComputerPlayer extends Player {
 
     private Random rand = new Random();
 
-    ComputerPlayer(int chips){
-        super(chips);
+    ComputerPlayer(int chips, ArrayList<Card> dealtCards){
+        super(chips, dealtCards);  // assumes Player has this constructor
         this.name = nameList[pokerUtils.randInt(0, nameList.length - 1)];
     }
 
