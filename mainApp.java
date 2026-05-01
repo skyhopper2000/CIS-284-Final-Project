@@ -1,65 +1,104 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class mainApp {
 
     static ArrayList<Player> computerPlayers = new ArrayList<>();
     static UserPlayer userPlayer;
     static ArrayList<Player> table = new ArrayList<>();
-    static public int highestBet = 0;
 
     private static void drawBoardStatus() {
         try {
-            for (Player p : computerPlayers) {
-                System.out.println("Name: " + p.getName() + "  Chips: " + p.getChips() + " " + p.displayIsDealer());
-                Thread.sleep(1000);
+            System.out.println("\n--- Table Status ---");
+            for (Player p : table) {
+                String tag = p == userPlayer ? "<You> " : "";
+                System.out.println(tag + "Name: " + p.getName()
+                        + "  Chips: " + p.getChips()
+                        + "  " + p.displayIsDealer());
+                Thread.sleep(300);
             }
-            System.out.println("<You> Name: " + userPlayer.getName() + "  Chips: " + userPlayer.getChips() + " " + userPlayer.displayIsDealer());
-            Thread.sleep(1000);
+            System.out.println("--------------------\n");
         } catch (InterruptedException e) {
-            System.out.println("Thread was interrupted");
+            Thread.currentThread().interrupt();
         }
     }
 
-    private static ArrayList<Player> orderTable(ArrayList<Player> table) {
+    private static ArrayList<Player> orderTable(ArrayList<Player> t) {
         int index = -1;
-        for (int i = 0; i < table.size(); i++) {
-            if (table.get(i).isDealer) { index = i; break; }
+        for (int i = 0; i < t.size(); i++) {
+            if (t.get(i).isDealer) { index = i; break; }
         }
-        if (index <= 0) return new ArrayList<>(table);
-
+        if (index <= 0) return new ArrayList<>(t);
         ArrayList<Player> result = new ArrayList<>();
-        result.addAll(table.subList(index, table.size()));
-        result.addAll(table.subList(0, index));
+        result.addAll(t.subList(index, t.size()));
+        result.addAll(t.subList(0, index));
         return result;
     }
 
-    private static boolean inPlay(ArrayList<Player> table) {
-        for (Player player : table) {
-            if (player.getDecision().equals("RAISE") || player.getDecision().equals("UNDECIDED")) {
-                return true;
+    private static ArrayList<Player> runBettingRound(
+            ArrayList<Player> activePlayers,
+            int[] highestBetHolder, 
+            BufferedReader mainReader) throws InterruptedException {
+
+        ArrayList<Player> foldedThisRound = new ArrayList<>();
+
+        ArrayList<Player> needToAct = new ArrayList<>(activePlayers);
+
+        while (!needToAct.isEmpty()) {
+            Player player = needToAct.remove(0);
+
+            if (foldedThisRound.contains(player)) continue;
+
+            if (player.currentBet == highestBetHolder[0]
+                    && !player.getDecision().equals("UNDECIDED")) {
+                continue;
+            }
+
+            String decision = player.makeDecision(highestBetHolder[0], mainReader);
+
+            String actual = player.setDecision(decision, highestBetHolder[0]);
+
+            System.out.println(player.getName() + " decided to " + actual + ".");
+            Thread.sleep(500);
+
+            if (actual.equals("RAISE")) {
+                highestBetHolder[0] = player.currentBet;
+
+                for (Player other : activePlayers) {
+                    if (!foldedThisRound.contains(other) && other != player
+                            && !needToAct.contains(other)) {
+                        needToAct.add(other);
+                    }
+                }
+            } else if (actual.equals("FOLD")) {
+                foldedThisRound.add(player);
+                // If only one player left, stop immediately
+                int remaining = activePlayers.size() - foldedThisRound.size();
+                if (remaining <= 1) break;
             }
         }
-        return false;
+
+        return foldedThisRound;
     }
 
     public static void main(String[] args) {
         BufferedReader mainReader = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Welcome to: 5-Card Draw Poker!");
-        System.out.println("How many computer players?");
 
         try {
-            DeckManager playDeck = new DeckManager();
-            playDeck.shuffle();
+            System.out.println("How many computer players? (1–5)");
+            int numNPCs = Integer.parseInt(mainReader.readLine().trim());
+            numNPCs = Math.max(1, Math.min(numNPCs, 5));
 
-            int numNPCs = Integer.parseInt(mainReader.readLine());
             for (int i = 0; i < numNPCs; i++) {
-                computerPlayers.add(new ComputerPlayer(150, playDeck.drawCards(5)));
+                computerPlayers.add(new ComputerPlayer(150, new ArrayList<>()));
             }
 
             System.out.println("What is your name?");
             String playerName = mainReader.readLine();
-            userPlayer = new UserPlayer(150, playDeck.drawCards(5), playerName);
+            userPlayer = new UserPlayer(150, new ArrayList<>(), playerName);
 
             table.add(userPlayer);
             table.addAll(computerPlayers);
@@ -68,102 +107,116 @@ public class mainApp {
 
             String playAnother;
             do {
-                // FIX: Reset all player state at the start of each round
-                highestBet = 0;
+                DeckManager playDeck = new DeckManager();
+                playDeck.shuffle();
+
+                for (Player p : table) {
+                    p.hand = new Hand();
+                    for (Card c : playDeck.drawCards(5)) {
+                        p.hand.addCard(c);
+                    }
+                }
+
                 for (Player p : table) p.resetForNewRound();
+                int[] highestBet = {0};   // boxed so helpers can mutate it
 
                 drawBoardStatus();
 
-                // ===== ANTE =====
                 for (Player player : table) {
                     player.placeBet(1);
                     System.out.println(player.getName() + " paid ante.");
                 }
+                highestBet[0] = 1; // ante sets the opening price to call
 
                 drawBoardStatus();
 
-                // ===== FIRST BETTING =====
-                int playerIndex = 0;
-                while (inPlay(table)) {
-                    playerIndex = (playerIndex + 1) % table.size();
-                    Player player = table.get(playerIndex);
-                    if (player.getDecision().equals("FOLD")) {
-                        System.out.println(player.getName() + " has already folded.");
-                        continue;
-                    }
-                    String newDecision = player.makeDecision(highestBet, mainReader);
-                    player.setDecision(newDecision, highestBet);
-                    System.out.println(player.getName() + " decided to " + newDecision + ".");
-                    Thread.sleep(1000);
-                }
+                Map<Player, Integer> round1Contributions = new HashMap<>();
+                ArrayList<Player> stillIn = new ArrayList<>(table);
+
+                ArrayList<Player> foldedRound1 = runBettingRound(stillIn, highestBet, mainReader);
+                stillIn.removeAll(foldedRound1);
+
+                for (Player p : table) round1Contributions.put(p, p.currentBet);
 
                 drawBoardStatus();
 
-                // ===== DRAW STEP =====
-                for (Player player : table) {
-                    if (!player.getDecision().equals("FOLD")) {
-                        ArrayList<Card> discards = player.chooseDiscards(mainReader);
-                        // Replace discarded cards with new draws
-                        for (Card discard : discards) {
-                            int idx = player.getHand().getCards().indexOf(discard);
-                            if (idx >= 0) player.getHand().replaceCard(idx, playDeck.drawCard());
+                for (Player player : stillIn) {
+                    ArrayList<Card> discards = player.chooseDiscards(mainReader);
+                    for (Card discard : discards) {
+                        int idx = player.getHand().getCards().indexOf(discard);
+                        if (idx >= 0) {
+                            Card drawn = playDeck.drawCard();
+                            if (drawn != null) player.getHand().replaceCard(idx, drawn);
                         }
-                        System.out.println(player.getName() + " discarded " + discards.size() + " card(s).");
-                        Thread.sleep(1000);
                     }
+                    System.out.println(player.getName() + " discarded " + discards.size() + " card(s).");
+                    Thread.sleep(500);
                 }
 
-                // ===== SECOND BETTING =====
-                // Reset folded players back to UNDECIDED so inPlay() works correctly
+                for (Player p : stillIn) {
+                    p.decision = "UNDECIDED";
+                    p.currentBet = 0;
+                }
+                highestBet[0] = 0;
+
+                ArrayList<Player> foldedRound2 = runBettingRound(new ArrayList<>(stillIn), highestBet, mainReader);
+                stillIn.removeAll(foldedRound2);
+
+                drawBoardStatus();
+
+                int pot = 0;
                 for (Player player : table) {
-                    if (player.getDecision().equals("FOLD")) {
-                        player.decision = "UNDECIDED";
-                    }
-                }
-                // Track who actually folded so we can re-skip them
-                ArrayList<Player> foldedPlayers = new ArrayList<>();
-
-                playerIndex = 0;
-                while (inPlay(table)) {
-                    playerIndex = (playerIndex + 1) % table.size();
-                    Player player = table.get(playerIndex);
-                    if (foldedPlayers.contains(player)) {
-                        System.out.println(player.getName() + " has already folded.");
-                        continue;
-                    }
-                    String newDecision = player.makeDecision(highestBet, mainReader);
-                    if (newDecision.equals("FOLD")) foldedPlayers.add(player);
-                    player.setDecision(newDecision, highestBet);
-                    System.out.println(player.getName() + " decided to " + newDecision + ".");
-                    Thread.sleep(1000);
+                    pot += round1Contributions.get(player); // ante + round 1
+                    pot += player.currentBet;               // round 2
                 }
 
-                // ===== SHOWDOWN =====
-                ArrayList<Player> showdownPlayers = new ArrayList<>();
-                for (Player player : table) {
-                    if (!foldedPlayers.contains(player)) {
-                        showdownPlayers.add(player);
+                if (stillIn.isEmpty()) {
+                    System.out.println("Everyone folded. The pot of " + pot + " chip(s) is returned.");
+                    for (Player player : table) {
+                        player.chips += round1Contributions.get(player);
+                        player.chips += player.currentBet;
+                    }
+                } else {
+                    // Show remaining hands
+                    for (Player player : stillIn) {
                         System.out.println(player.getName() + ": " + player.getHand().toString());
                     }
+
+                    ArrayList<Player> winners = pokerUtils.showdown(stillIn);
+                    int share = pot / winners.size();
+
+                    System.out.print("Winner(s): ");
+                    for (Player player : winners) {
+                        System.out.print(player.getName() + " ");
+                        player.chips += share;
+                    }
+                    System.out.println("\nPot of " + pot + " chip(s) split "
+                            + winners.size() + " way(s) (" + share + " each).");
                 }
-                ArrayList<Player> winners = pokerUtils.showdown(showdownPlayers);
 
-                System.out.print("Winner(s): ");
-                for (Player player : winners) System.out.print(player.getName() + " ");
-                System.out.println();
+                int dealerIdx = -1;
+                for (int i = 0; i < table.size(); i++) {
+                    if (table.get(i).isDealer) { dealerIdx = i; break; }
+                }
+                if (dealerIdx >= 0) {
+                    table.get(dealerIdx).isDealer = false;
+                    table.get((dealerIdx + 1) % table.size()).isDealer = true;
+                }
 
-                // ===== CONTINUE =====
                 System.out.println("Would you like to play another round? (y/n)");
                 playAnother = mainReader.readLine();
 
-            } while ("y".equals(playAnother));
+            } while ("y".equalsIgnoreCase(playAnother != null ? playAnother.trim() : ""));
+
+            System.out.println("Thanks for playing!");
 
         } catch (IOException e) {
             System.out.println("IO Error: " + e);
         } catch (NumberFormatException n) {
-            System.out.println("Invalid input: " + n);
+            System.out.println("Invalid number input: " + n);
         } catch (InterruptedException ie) {
             System.out.println("Thread interrupted.");
+            Thread.currentThread().interrupt();
         }
     }
 }
