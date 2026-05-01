@@ -1,3 +1,4 @@
+import java.io.BufferedReader;
 import java.util.*;
 
 public class ComputerPlayer extends Player {
@@ -9,8 +10,8 @@ public class ComputerPlayer extends Player {
 
     private Random rand = new Random();
 
-    ComputerPlayer(int chips){
-        super(chips);
+    ComputerPlayer(int chips, ArrayList<Card> newHand){
+        super(chips, newHand);
         this.name = nameList[pokerUtils.randInt(0, nameList.length - 1)];
     }
 
@@ -29,8 +30,8 @@ public class ComputerPlayer extends Player {
     }
 
     // ===== DISCARD LOGIC =====
-    public ArrayList<Integer> chooseDiscards() {
-        ArrayList<Integer> discards = new ArrayList<>();
+    public ArrayList<Card> chooseDiscards(BufferedReader mainReader) {
+        ArrayList<Card> discards = new ArrayList<>();
         HashMap<Integer, Integer> counts = new HashMap<>();
 
         for (Card c : hand.getCards()) {
@@ -42,7 +43,7 @@ public class ComputerPlayer extends Player {
             Card c = hand.getCards().get(i);
 
             if (counts.get(c.getValue()) == 1) {
-                discards.add(i);
+                discards.add(c);
             }
         }
 
@@ -59,7 +60,7 @@ public class ComputerPlayer extends Player {
     }
 
     // ===== BETTING LOGIC (MORE AGGRESSIVE) =====
-    public String makeDecision(int currentBet) {
+    public String makeDecision(int currentBet, BufferedReader mainReader) {
         int strength = evaluateHand();
         int roll = rand.nextInt(100);
 
@@ -80,8 +81,10 @@ public class ComputerPlayer extends Player {
         return "FOLD";
     }
 
+    // DEPRECATED
+    /* 
     // ===== TURN LOGIC =====
-    public void takeTurn(Deck deck, int currentBet) {
+    public void takeTurn(DeckManager deck, int currentBet) {
 
         // discard phase
         ArrayList<Integer> discards = chooseDiscards();
@@ -95,4 +98,5 @@ public class ComputerPlayer extends Player {
 
         System.out.println(name + " chooses to " + decision);
     }
+        */
 }

@@ -50,8 +50,22 @@ abstract public class Player{
         }
     }
 
+    protected void resolveRound(Boolean isWinner, int pot){
+        if (isWinner){
+            chips = chips + pot;
+        } else {
+            chips = chips - currentBet;
+        }
+        decision = "UNDECIDED";
+        currentBet = 0;
+    }
+
     protected int getChips(){
         return chips;
+    }
+
+    protected int getBet(){
+        return currentBet;
     }
 
     protected String getDecision(){
@@ -73,6 +87,10 @@ abstract public class Player{
 
     protected void assignDealer(){
         isDealer = true;
+    }
+
+    protected void unassignDealer(){
+        isDealer = false;
     }
 
     abstract protected String makeDecision(int currentBet, BufferedReader mainReader);

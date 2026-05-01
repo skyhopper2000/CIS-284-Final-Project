@@ -3,25 +3,29 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
+
 public class mainApp {
 
   static ArrayList<Player> computerPlayers = new ArrayList<>();
   static UserPlayer userPlayer;
   static ArrayList<Player> table = new ArrayList<>();
   static public int highestBet = 0;
+  static String playAnother = "n";
 
   private static void drawBoardStatus(){
     try{
     for(int i = 0; i < computerPlayers.size(); i++){
       Player currentPlayer = computerPlayers.get(i);
       System.out.println(
-        "Name: " + currentPlayer.getName() + " Chips: " + currentPlayer.getChips() + " " + currentPlayer.displayIsDealer()
+        "Name: " + currentPlayer.getName() + " Chips: " + currentPlayer.getChips() + " " + currentPlayer.displayIsDealer() +
+        "Current Bet: " + currentPlayer.getBet()
       );
       Thread.sleep(1000);
     }
     Player currentPlayer = userPlayer;
     System.out.println(
-        "<You> Name: " + currentPlayer.getName() + " Chips: " + currentPlayer.getChips() + " " + currentPlayer.displayIsDealer()
+        "<You> Name: " + currentPlayer.getName() + " Chips: " + currentPlayer.getChips() + " " + currentPlayer.displayIsDealer() +
+        "Current Bet: " + currentPlayer.getBet()
       );
       Thread.sleep(1000);
     } catch (InterruptedException e){
@@ -74,7 +78,7 @@ public class mainApp {
     BufferedReader mainReader = new BufferedReader(new InputStreamReader(System.in));
     System.out.println("Welcome to: 5-Card Draw Poker!");
     System.out.println("How many computer players?");
-    String playAnother = "n";
+    
     try{
 
       DeckManager playDeck = new DeckManager();
@@ -95,6 +99,8 @@ public class mainApp {
       table.get(pokerUtils.randInt(0, table.size() - 1)).assignDealer();
       table = orderTable(table);
 
+      Boolean playAnother = false;
+
       // Game Loop
 
       int turn = 0;
@@ -103,13 +109,14 @@ public class mainApp {
         turn++;
 
         // display board status
+        table = orderTable(table);
         drawBoardStatus();
 
         // ===== PAY ANTE ===== //
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
           player.placeBet(1);
-          System.out.print(player.getName() + " paid ante");
+          System.out.println(player.getName() + " paid ante");
         }
         Player dealer = table.get(0);
         dealer.placeBet(1);
@@ -123,6 +130,7 @@ public class mainApp {
         while(inPlay(table)){
           // loop over table
           playerIndex++;
+          if (playerIndex >= table.size()) {playerIndex = 0;}
           Player player = table.get(playerIndex);
           // don't bet players who have folded
           if (player.getDecision() == "FOLD"){
@@ -133,6 +141,9 @@ public class mainApp {
           String newDecision = player.makeDecision(highestBet, mainReader);
           player.setDecision(newDecision, highestBet);
           System.out.println(player.getName() + " has decided to " + newDecision);
+          if (newDecision.equals("RAISE")){
+            highestBet = player.getBet();
+          }
           Thread.sleep(1000);
         }
         // ===== END FIRST BETTING ===== //
@@ -144,9 +155,14 @@ public class mainApp {
           Player player = table.get(i);
           if (player.getDecision() != "FOLD"){
             ArrayList<Card> discards = player.chooseDiscards(mainReader);
-            System.out.println(player.getName() + " discarded " + discards.size() + "cards.");
+            System.out.println(player.getName() + " discarded " + discards.size() + " cards.");
             Thread.sleep(1000);
           }
+        }
+        if (dealer.getDecision() != "FOLD"){
+          ArrayList<Card> discards = dealer.chooseDiscards(mainReader);
+          System.out.println(dealer.getName() + " discarded " + discards.size() + " cards.");
+          Thread.sleep(1000);
         }
         // ===== END DRAW STEP ===== //
 
@@ -162,6 +178,7 @@ public class mainApp {
         playerIndex = 0;
         while(inPlay(table)){
           playerIndex++;
+          if (playerIndex >= table.size()) {playerIndex = 0;}
           Player player = table.get(playerIndex);
           if (player.getDecision() == "FOLD"){
             System.out.println(player.getName() + " has already folded.");
@@ -170,6 +187,9 @@ public class mainApp {
           String newDecision = player.makeDecision(highestBet, mainReader);
           player.setDecision(newDecision, highestBet);
           System.out.println(player.getName() + " has decided to " + newDecision);
+          if (newDecision.equals("RAISE")){
+            highestBet = player.getBet();
+          }
           Thread.sleep(1000);
         }
         // ===== END SECOND BETTING ===== //
@@ -191,12 +211,34 @@ public class mainApp {
         for(Player player : winners){
           System.out.print(player.getName() + " ");
         }
+        System.out.println();
+        int pot = 0;
+        for (Player player : table) {
+          pot += player.getBet();
+        }
+        for (Player player : table) {
+          player.resolveRound((winners.contains(player)), pot);
+        }
 
         // ===== CONTINUE ===== //
         System.out.println("Would you like to play another round? (y/n)");
-        playAnother = mainReader.readLine();
+        playAnother = (mainReader.readLine().equals("y"));
 
-      } while (playAnother == "y");
+        if (playAnother == true){
+          for (int i = 0; i < table.size(); i ++){
+            Player player = table.get(i);
+            if (player.isDealer) {
+              player.unassignDealer();
+              if (i == table.size() - 1){
+                table.get(0).assignDealer();
+              } else {
+                table.get(i + 1).assignDealer();
+              }
+            }
+          }
+        }
+        
+      } while (playAnother);
     // Exception handling, prevents exiting application prematurely on an error
     } catch (IOException e){
         System.out.println("IO Error: " + e);

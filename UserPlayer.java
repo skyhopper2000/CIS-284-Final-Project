@@ -18,7 +18,6 @@ public class UserPlayer extends Player{
             System.out.println("1.) Call");
             System.out.println("2.) Raise");
             System.out.println("3.) Fold");
-            System.out.println("Any other inputs) Call");
             int choice = Integer.parseInt(mainReader.readLine());
             switch (choice) {
                 case 1:
