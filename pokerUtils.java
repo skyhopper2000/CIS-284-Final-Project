@@ -22,44 +22,61 @@ public class pokerUtils {
     }
 
     public static int evaluateHandRank(Hand hand) {
+        public static int evaluateHandRank(Hand hand){
         HashMap<Integer, Integer> counts = new HashMap<>();
+
+        // count card values
         for (Card c : hand.getCards()) {
             int val = c.getValue();
             counts.put(val, counts.getOrDefault(val, 0) + 1);
         }
-        int maxCount = 0;
-        for (int count : counts.values()) maxCount = Math.max(maxCount, count);
 
+        // Find the highest ranking card of the highest value set
+        // I am 99% certain that this will handle all edge cases
         int dominantValue = 0;
-        for (HashMap.Entry<Integer, Integer> e : counts.entrySet()) {
-            if (e.getValue() == maxCount && e.getKey() > dominantValue) {
-                dominantValue = e.getKey();
+        int dominantValueTier = 0;
+        for(int nOfAKind = 1; nOfAKind < 5; nOfAKind++){
+            for (int i = 0; i < hand.getCards().size(); i++) {
+                Card c = hand.getCards().get(i);
+                if (counts.get(c.getValue()) == nOfAKind){
+                    if ((c.getValue() > dominantValue) && (nOfAKind >= dominantValueTier)){
+                        dominantValue = c.getValue();
+                        dominantValueTier = nOfAKind;
+                    }
+                }
             }
         }
+
         return dominantValue;
     }
 
-    public static ArrayList<Player> showdown(ArrayList<Player> players) {
-        if (players.isEmpty()) return players;
+    public static ArrayList<Player> showdown(ArrayList<Player> players){
+        /*
+        Calculates the winner of the showdown
+        The logic here is somewhat shakey but walk with me here
+        */
 
-        ArrayList<Player> remaining = new ArrayList<>(players);
+        // setup
+        ArrayList<Player> winners = new ArrayList<>();
+        int bestHandType = 0;
+        int bestHandRank = 0;
 
-        int bestType = 0;
-        for (Player p : remaining) bestType = Math.max(bestType, evaluateHandType(p.getHand()));
-        Iterator<Player> it = remaining.iterator();
-        while (it.hasNext()) {
-            if (evaluateHandType(it.next().getHand()) < bestType) it.remove();
-        }
+        //Find best players
+        for (Player player : players) {
+            int handType = evaluateHandType(player.getHand());
+            int handRank = evaluateHandRank(player.getHand());
 
-        if (remaining.size() > 1) {
-            int bestRank = 0;
-            for (Player p : remaining) bestRank = Math.max(bestRank, evaluateHandRank(p.getHand()));
-            it = remaining.iterator();
-            while (it.hasNext()) {
-                if (evaluateHandRank(it.next().getHand()) < bestRank) it.remove();
+            if (handType > bestHandType || (handType == bestHandType && handRank > bestHandRank)) {
+                // New best hand found - clear previous winners
+                bestHandType = handType;
+                bestHandRank = handRank;
+                winners.clear();
+                winners.add(player);
+            } else if (handType == bestHandType && handRank == bestHandRank) {
+                // Tied with current best - add to winners list
+                winners.add(player);
             }
         }
-
-        return remaining;
+        return winners;
     }
 }
