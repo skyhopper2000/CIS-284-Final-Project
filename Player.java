@@ -30,31 +30,26 @@ abstract public class Player {
         }
     }
 
-    protected void setDecision(String decision, int highestBet){
+    protected String setDecision(String decision, int highestBet){
         this.decision = decision;
         switch (decision){
             case "RAISE":
                 placeBet(currentBet + highestBet);
-                break;
+                return "RAISE";
             case "CALL":
                 placeBet(highestBet);
-                break;
+                return "CALL";
             case "FOLD":
-                break;
+                return "FOLD";
             case "UNDECIDED":
-                break;
+                return "UNDECIDED";
             default:
                 System.out.println("Invalid choice " + decision);
-                break;
+                return "CALL";
         }
     }
 
-    protected void resolveRound(Boolean isWinner, int pot){
-        if (isWinner){
-            chips = chips + pot;
-        } else {
-            chips = chips - currentBet;
-        }
+    protected void resetForNewRound(){
         decision = "UNDECIDED";
         currentBet = 0;
     }

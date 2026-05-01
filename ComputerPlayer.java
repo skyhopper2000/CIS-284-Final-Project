@@ -1,11 +1,14 @@
 import java.io.BufferedReader;
-import java.util.ArrayList;
+import java.util.*;
 
 public class ComputerPlayer extends Player {
+
+    private Random rand = new Random();
 
     ComputerPlayer(int chips, ArrayList<Card> newHand) {
         super(chips, newHand);
         this.name = "CPU-" + (int)(Math.random() * 1000);
+
     }
 
     // ===== HAND STRENGTH =====

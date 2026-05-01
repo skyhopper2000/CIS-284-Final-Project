@@ -21,8 +21,7 @@ public class pokerUtils {
         return 1;
     }
 
-    public static int evaluateHandRank(Hand hand) {
-        public static int evaluateHandRank(Hand hand){
+    public static int evaluateHandRank(Hand hand){
         HashMap<Integer, Integer> counts = new HashMap<>();
 
         // count card values

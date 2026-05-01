@@ -88,7 +88,7 @@ public class mainApp {
         System.out.println("Welcome to: 5-Card Draw Poker!");
 
         try {
-            System.out.println("How many computer players? (1–5)");
+            System.out.println("How many computer players? (1-5)");
             int numNPCs = Integer.parseInt(mainReader.readLine().trim());
             numNPCs = Math.max(1, Math.min(numNPCs, 5));
 
@@ -167,7 +167,6 @@ public class mainApp {
                 int pot = 0;
                 for (Player player : table) {
                     pot += round1Contributions.get(player); // ante + round 1
-                    pot += player.currentBet;               // round 2
                 }
 
                 if (stillIn.isEmpty()) {
@@ -190,6 +189,12 @@ public class mainApp {
                         System.out.print(player.getName() + " ");
                         player.chips += share;
                     }
+                    for (Player player : table){
+                      if(!winners.contains(player)){
+                        player.chips = player.chips - player.currentBet;
+                      }
+                    }
+                    
                     System.out.println("\nPot of " + pot + " chip(s) split "
                             + winners.size() + " way(s) (" + share + " each).");
                 }
