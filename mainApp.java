@@ -61,7 +61,7 @@ public class mainApp {
   private static Boolean inPlay(ArrayList<Player> table){
     for(int i = 0; i < table.size(); i++){
       Player player = table.get(i);
-      if ((player.getDecision() == "RAISE") || (player.getDecision() == "UNDECIDED")){
+      if (player.getDecision().equals("RAISE") || player.getDecision().equals("UNDECIDED")){
         return true;
       }
     }
@@ -122,10 +122,10 @@ public class mainApp {
         int playerIndex = 0;
         while(inPlay(table)){
           // loop over table
-          playerIndex++;
+          playerIndex = (playerIndex + 1) % table.size();
           Player player = table.get(playerIndex);
           // don't bet players who have folded
-          if (player.getDecision() == "FOLD"){
+          if (player.getDecision().equals("FOLD")){
             System.out.println(player.getName() + " has already folded.");
             continue;
           }
@@ -142,7 +142,7 @@ public class mainApp {
         // ===== DRAW STEP ====== //
         for (int i = 1; i < table.size(); i++){
           Player player = table.get(i);
-          if (player.getDecision() != "FOLD"){
+          if (!player.getDecision().equals("FOLD")){
             ArrayList<Card> discards = player.chooseDiscards(mainReader);
             System.out.println(player.getName() + " discarded " + discards.size() + "cards.");
             Thread.sleep(1000);
@@ -154,14 +154,14 @@ public class mainApp {
         // set aside all folded players
         for (int i = 0; i < table.size(); i++){
           Player player = table.get(i);
-          if (player.getDecision() != "FOLD"){
+          if (player.getDecision().equals("FOLD")){
             player.setDecision("UNDECIDED", highestBet);
           }
         }
         // loop over unfolded players
         playerIndex = 0;
         while(inPlay(table)){
-          playerIndex++;
+          playerIndex = (playerIndex + 1) % table.size();
           Player player = table.get(playerIndex);
           if (player.getDecision() == "FOLD"){
             System.out.println(player.getName() + " has already folded.");
@@ -178,7 +178,7 @@ public class mainApp {
         ArrayList<Player> showdownPlayers = new ArrayList<>(); // isolate players in a showdown
         for (int i = 0; i < table.size(); i++){
           Player player = table.get(i);
-          if (player.getDecision() != "FOLD"){
+          if (!player.getDecision().equals("FOLD")){
             showdownPlayers.add(player);
             System.err.println(player.getName() + ": " + player.getHand().toString());
           }
@@ -196,7 +196,7 @@ public class mainApp {
         System.out.println("Would you like to play another round? (y/n)");
         playAnother = mainReader.readLine();
 
-      } while (playAnother == "y");
+      } while (playAnother.equals("y"));
     // Exception handling, prevents exiting application prematurely on an error
     } catch (IOException e){
         System.out.println("IO Error: " + e);
